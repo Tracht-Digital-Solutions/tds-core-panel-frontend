@@ -1,0 +1,30 @@
+---
+// Base panel shell. The full port carries tds-admin's auth gate + brand chrome;
+// this is the skeleton that renders the composed nav so the smoke can verify
+// extension nav + routing. `registry.nav` is already permission-annotated and
+// order-sorted by the contract.
+import { registry } from "virtual:panel-registry";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Panel</title>
+  </head>
+  <body>
+    <header class="brand-header"><strong>Base-Panel</strong></header>
+    <nav class="panel-nav">
+      <a href="/">Dashboard</a>
+      {registry.nav.map((item) => <a href={item.href} data-nav={item.id}>{item.label}</a>)}
+    </nav>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

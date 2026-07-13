@@ -1,0 +1,28 @@
+{
+  "name": "core-panel-frontend",
+  "version": "0.1.0",
+  "description": "Base panel host (Astro static). Composes enabled extensions at build time via panel-contract into one static panel. Built as the admin OR customer product target.",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "type-check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/react": "^5.0.5",
+    "@tracht-digital-solutions/ext-time-tracker": "file:../ext-time-tracker",
+    "@tracht-digital-solutions/panel-contract": "file:../panel-contract",
+    "astro": "^6.4.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.6.0"
+  }
+}

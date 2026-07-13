@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.tsbuildinfo
+
+# Windows OS files
+Thumbs.db
+Desktop.ini
+
+# Editor backups
+*.swp
+*~
