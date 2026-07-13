@@ -14,8 +14,8 @@ panel are the same host built with different extension lists (different
 `astro.config.mjs` enables extensions:
 
 ```ts
-import { panelHost } from "@tracht-digital-solutions/panel-contract/astro";
-import timeTracker from "@tracht-digital-solutions/ext-time-tracker";
+import { panelHost } from "@tracht-digital-solutions/tds-panel-contract/astro";
+import timeTracker from "@tracht-digital-solutions/tds-ext-time-tracker";
 export default defineConfig({ integrations: [react(), panelHost({ extensions: [timeTracker] })] });
 ```
 
@@ -33,7 +33,7 @@ Declared for TypeScript in `src/env.d.ts`.
 ## Develop
 
 ```bash
-npm install        # file: deps on ../panel-contract + ../ext-time-tracker in dev
+npm install        # file: deps on ../tds-panel-contract + ../tds-ext-time-tracker in dev
 npm run dev
 npm run build      # → dist/ (the deployed static artifact)
 npm run type-check # astro check — 0 errors gate

@@ -1,5 +1,5 @@
 {
-  "name": "core-panel-frontend",
+  "name": "tds-core-panel-frontend",
   "version": "0.1.0",
   "description": "Base panel host (Astro static). Composes enabled extensions at build time via panel-contract into one static panel. Built as the admin OR customer product target.",
   "license": "UNLICENSED",
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@astrojs/react": "^5.0.5",
-    "@tracht-digital-solutions/ext-time-tracker": "file:../ext-time-tracker",
-    "@tracht-digital-solutions/panel-contract": "file:../panel-contract",
+    "@tracht-digital-solutions/tds-ext-time-tracker": "file:../tds-ext-time-tracker",
+    "@tracht-digital-solutions/tds-panel-contract": "file:../tds-panel-contract",
     "astro": "^6.4.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -1,12 +1,12 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
-import { panelHost } from "@tracht-digital-solutions/panel-contract/astro";
+import { panelHost } from "@tracht-digital-solutions/tds-panel-contract/astro";
 
 // Enabled extensions for THIS product target (admin). The customer target is a
 // second config with a different extension list. panelHost composes them at
 // build time: injects each route + exposes the registry / widgets / settings
 // virtual modules. A conflict or missing dependency fails the build here.
-import timeTracker from "@tracht-digital-solutions/ext-time-tracker";
+import timeTracker from "@tracht-digital-solutions/tds-ext-time-tracker";
 
 export default defineConfig({
   output: "static",
