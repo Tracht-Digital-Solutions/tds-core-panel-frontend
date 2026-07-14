@@ -12,6 +12,7 @@ import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
 import timeTracker from "@tracht-digital-solutions/tds-ext-time-tracker";
 import supportTickets from "@tracht-digital-solutions/tds-ext-support-tickets";
 import websiteCms from "@tracht-digital-solutions/tds-ext-website-cms";
+import blogCms from "@tracht-digital-solutions/tds-ext-blog-cms";
 
 // Product target selects the enabled extension set. `PANEL_TARGET=customer`
 // builds the customer portal (customer-facing extensions only); default is the
@@ -23,7 +24,7 @@ process.env.PUBLIC_PANEL_TARGET = target;
 const extensions =
   target === "customer"
     ? [supportTickets] // customer portal: raise + follow tickets
-    : [timeTracker, supportTickets, websiteCms]; // admin panel: all internal tools
+    : [timeTracker, supportTickets, websiteCms, blogCms]; // admin panel: all internal tools
 
 export default defineConfig({
   output: "static",
