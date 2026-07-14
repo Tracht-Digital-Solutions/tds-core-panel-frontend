@@ -50,6 +50,10 @@ the composed nav from `virtual:panel-registry`, a `/login` page + `LoginForm`, t
 emitted. **User management (CP2):** a `/users` page + `UsersAdmin` island talking
 to tds-auth-api's `/admin/users` endpoints (list / create / toggle-admin /
 reset-password / delete) via `panelFetch`; base-service nav ("Verwaltung":
-Dashboard + Nutzer) sits alongside the extension-contributed nav. Still to port
-from `tds-admin`: fine-grained permission + company-membership editing, Wiki, the
-settings-framework page, per-user dashboard layout, and the customer product target.
+Dashboard + Nutzer) sits alongside the extension-contributed nav. **Settings host (CP3):** `/einstellungen` renders every enabled extension's
+settings section from `virtual:panel-settings` (the same host pattern as the
+dashboard widgets). The host now enables **three real extensions** (time-tracker,
+support-tickets, website-cms) — the build composes 3 routes + 3 dashboard widgets
++ 3 settings panels + grouped nav, proving nav + widgets + settings end-to-end.
+Still to port from `tds-admin`: fine-grained permission + company-membership
+editing, Wiki, per-user dashboard layout, and the customer product target.

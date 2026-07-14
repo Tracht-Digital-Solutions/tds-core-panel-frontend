@@ -10,10 +10,12 @@ import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
 // build time: injects each route + exposes the registry / widgets / settings
 // virtual modules. A conflict or missing dependency fails the build here.
 import timeTracker from "@tracht-digital-solutions/tds-ext-time-tracker";
+import supportTickets from "@tracht-digital-solutions/tds-ext-support-tickets";
+import websiteCms from "@tracht-digital-solutions/tds-ext-website-cms";
 
 export default defineConfig({
   output: "static",
-  integrations: [react(), panelHost({ extensions: [timeTracker] })],
+  integrations: [react(), panelHost({ extensions: [timeTracker, supportTickets, websiteCms] })],
   trailingSlash: "ignore",
   build: { format: "directory" },
   vite: { build: { ...tdsViteBuild } },
