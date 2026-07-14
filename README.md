@@ -47,5 +47,9 @@ confirmation + `html.auth-checking` spinner) in `Layout.astro`, brand chrome wit
 the composed nav from `virtual:panel-registry`, a `/login` page + `LoginForm`, the
 `~/lib/auth` fetch wrapper (401→`/me` backstop, cross-panel SSO hints), and the
 `CookieNotice`. Builds green (`/`, `/login`, `/time`), type-check 0 errors, fonts
-emitted. Still to port from `tds-admin`: Wiki, user management, the settings
-framework page, per-user dashboard layout, and the customer product target.
+emitted. **User management (CP2):** a `/users` page + `UsersAdmin` island talking
+to tds-auth-api's `/admin/users` endpoints (list / create / toggle-admin /
+reset-password / delete) via `panelFetch`; base-service nav ("Verwaltung":
+Dashboard + Nutzer) sits alongside the extension-contributed nav. Still to port
+from `tds-admin`: fine-grained permission + company-membership editing, Wiki, the
+settings-framework page, per-user dashboard layout, and the customer product target.

@@ -1,0 +1,9 @@
+---
+import Layout from "../layouts/Layout.astro";
+import UsersAdmin from "../components/UsersAdmin.tsx";
+---
+
+<Layout title="Nutzerverwaltung">
+  <h1 class="text-xl font-bold mb-4">Nutzerverwaltung</h1>
+  <UsersAdmin client:load />
+</Layout>
