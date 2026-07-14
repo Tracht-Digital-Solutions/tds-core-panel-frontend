@@ -1,0 +1,25 @@
+name: Dev build → dev-<target> branches
+
+# On every push to main, build both targets and force-publish each dist/ to its
+# orphan dev branch (dev-admin / dev-customer). NOT deployed — the continuously-
+# built dev artifact + push-to-main build gate. Production goes via release.yml.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: dev-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    with:
+      publish_branch: dev
+    secrets: inherit

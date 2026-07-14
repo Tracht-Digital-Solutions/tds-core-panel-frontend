@@ -1,0 +1,101 @@
+name: Build (reusable)
+
+# Single source of truth for the panel host's pipeline. Builds BOTH product
+# targets (admin + customer) via a matrix from one codebase (PANEL_TARGET), and
+# force-publishes each dist/ to a target-specific orphan branch. Called by ci.yml
+# (PR gate, no publish), dev.yml (dev branches) and release.yml (release branches
+# + deploy ping). See AGENTS.md for the --no-package-lock / NPM_TOKEN rationale.
+
+on:
+  workflow_call:
+    inputs:
+      publish_branch:
+        description: "Orphan branch prefix to publish dist/ to (dev | release). Empty = CI (no publish). Actual branch is <prefix>-<target>."
+        type: string
+        default: ""
+      deploy:
+        description: Ping the per-target deploy webhook after publishing (release only).
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [admin, customer]
+    env:
+      # The host builds as this product target: extension set (astro.config) +
+      # auth hint key + brand (src/config/target.ts).
+      PANEL_TARGET: ${{ matrix.target }}
+      PUBLIC_PANEL_TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@tracht-digital-solutions"
+
+      - name: Install
+        # --no-package-lock: the Windows lockfile is win32-only (npm#4828). The
+        # host pulls the published extension + tds-shared packages from GitHub
+        # Packages, so NPM_TOKEN (read:packages) is required.
+        run: npm install --no-package-lock
+        env:
+          NPM_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Build (${{ matrix.target }})
+        run: npm run build
+
+      - name: Stamp build
+        if: ${{ inputs.publish_branch != '' }}
+        run: |
+          mkdir -p dist
+          {
+            echo "target=${{ matrix.target }}"
+            echo "channel=${{ inputs.publish_branch }}"
+            echo "commit=${GITHUB_SHA}"
+            echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "workflow_run=${GITHUB_RUN_ID}"
+          } > dist/.build-info
+
+      - name: Publish dist to ${{ inputs.publish_branch }}-${{ matrix.target }}
+        if: ${{ inputs.publish_branch != '' }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.PACKAGE_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: ${{ inputs.publish_branch }}-${{ matrix.target }}
+          commit_message: "${{ inputs.publish_branch }}-${{ matrix.target }} ${{ github.sha }}"
+          force_orphan: true
+
+      - name: Trigger deploy webhook (${{ matrix.target }})
+        if: ${{ inputs.deploy }}
+        env:
+          # Per-target webhook: the admin panel + customer portal deploy to
+          # different domains. A failed ping must not red the run (the branch is
+          # already published).
+          DEPLOY_WEBHOOK_URL: ${{ matrix.target == 'admin' && secrets.DEPLOY_WEBHOOK_ADMIN || secrets.DEPLOY_WEBHOOK_CUSTOMER }}
+        run: |
+          if [ -z "$DEPLOY_WEBHOOK_URL" ]; then
+            echo "No deploy webhook for ${{ matrix.target }} - skipping ping."
+            exit 0
+          fi
+          echo "POSTing deploy webhook to $(printf '%s' "$DEPLOY_WEBHOOK_URL" | cut -d/ -f1-3) ..."
+          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -X POST -L --post301 --post302 --post303 \
+            --retry 3 --retry-delay 5 --max-time 30 \
+            "$DEPLOY_WEBHOOK_URL" || echo "000")
+          if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+            echo "Deploy webhook pinged (HTTP $code)."
+          else
+            echo "::warning title=Deploy webhook failed::${{ matrix.target }} webhook returned HTTP $code. The branch is published but the host was not notified."
+          fi

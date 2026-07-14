@@ -1,0 +1,25 @@
+name: Release → release-<target> branches (manual)
+
+# Production build, ONLY on the manual Actions button. Builds both targets,
+# force-publishes each dist/ to its orphan release branch (release-admin /
+# release-customer), then pings the per-target deploy webhook so each host pulls
+# its branch and goes live. Pipeline body in _build.yml.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    with:
+      publish_branch: release
+      deploy: true
+    secrets: inherit

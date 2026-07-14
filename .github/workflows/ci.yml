@@ -1,0 +1,21 @@
+name: CI
+
+# PR gate: build both product targets (admin + customer) from the published
+# extension packages, no publish. Pipeline body in _build.yml.
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    secrets: inherit
