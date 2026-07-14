@@ -10,9 +10,11 @@
  * user back to login.
  */
 
-const AUTHED_HINT_KEY = "tds_admin_authed";
-const AUTHED_EXP_KEY = "tds_admin_authed_exp";
-const CONFIRMED_KEY = "tds_admin_confirmed";
+import { HINT_PREFIX } from "../config/target";
+
+const AUTHED_HINT_KEY = `${HINT_PREFIX}_authed`;
+const AUTHED_EXP_KEY = `${HINT_PREFIX}_authed_exp`;
+const CONFIRMED_KEY = `${HINT_PREFIX}_confirmed`;
 
 /** How long a `/me` confirmation is trusted before the gate re-checks (ms). Keep in sync with the inline gate. */
 export const CONFIRM_TTL_MS = 60_000;

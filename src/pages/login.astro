@@ -1,13 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import LoginForm from "../components/LoginForm.tsx";
+import { BRAND_SUFFIX } from "../config/target";
 ---
 
 <Layout title="Anmelden" bare>
   <main class="login-page min-h-screen grid place-items-center p-6">
     <section class="card w-full max-w-sm p-6">
       <header class="brand-header mb-4">
-        <strong class="brand-wordmark text-lg">Tracht<span class="accent-italic"> Panel</span></strong>
+        <strong class="brand-wordmark text-lg">Tracht<span class="accent-italic"> {BRAND_SUFFIX}</span></strong>
       </header>
       <h1 class="text-xl font-bold mb-4">Anmelden</h1>
       <LoginForm client:load />

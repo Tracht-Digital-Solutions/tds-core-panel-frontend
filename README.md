@@ -5,9 +5,19 @@ auth gate, nav), the **Dashboard widget host**, Wiki, user management and the
 settings framework — and composes enabled **extensions** at build time via
 `panel-contract` into one static panel.
 
-One codebase, **two product targets**: the **admin** panel and the **customer**
-panel are the same host built with different extension lists (different
-`astro.config` / build env).
+One codebase, **two product targets** selected by `PANEL_TARGET`:
+
+```bash
+npm run build                    # admin panel  (all internal tools)
+PANEL_TARGET=customer npm run build   # customer portal (customer-facing extensions)
+```
+
+The target picks the enabled extension set (`astro.config.mjs`), the auth hint
+key (`tds_admin_*` vs `tds_customer_*`, so a stale admin hint can't reveal the
+portal — the shared session cookie still SSOs where the principal has access),
+and the brand suffix ("Panel" / "Portal"). See `src/config/target.ts`. The
+`tds-admin-panel` / `tds-customer-panel` repos are the deploy targets for these
+two builds.
 
 ## How composition works
 

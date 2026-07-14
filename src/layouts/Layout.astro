@@ -10,6 +10,11 @@ import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
 import { CookieNotice } from "@tracht-digital-solutions/tds-shared/components";
 import { registry } from "virtual:panel-registry";
+import { HINT_PREFIX, BRAND_SUFFIX } from "../config/target";
+
+const hintKey = `${HINT_PREFIX}_authed`;
+const expKey = `${HINT_PREFIX}_authed_exp`;
+const confirmedKey = `${HINT_PREFIX}_confirmed`;
 
 interface Props {
   title: string;
@@ -85,30 +90,30 @@ for (const item of registry.nav) {
             @keyframes tds-auth-spin { to { transform: rotate(360deg); } }
           </style>
 
-          <script is:inline define:vars={{ authApiUrl }}>
+          <script is:inline define:vars={{ authApiUrl, hintKey, expKey, confirmedKey }}>
             (function () {
               function redirect() {
                 var next = encodeURIComponent(location.pathname + location.search);
                 location.replace("/login?next=" + next);
               }
+              function clear() {
+                try {
+                  localStorage.removeItem(hintKey);
+                  localStorage.removeItem(expKey);
+                  localStorage.removeItem(confirmedKey);
+                } catch (e) {}
+              }
               var hint, exp, okUntil;
               try {
-                hint = localStorage.getItem("tds_admin_authed");
-                exp = localStorage.getItem("tds_admin_authed_exp");
-                okUntil = localStorage.getItem("tds_admin_confirmed");
+                hint = localStorage.getItem(hintKey);
+                exp = localStorage.getItem(expKey);
+                okUntil = localStorage.getItem(confirmedKey);
               } catch (e) { redirect(); return; }
 
               if (!hint) { redirect(); return; }
 
               var expMs = exp ? Number(exp) : NaN;
-              if (Number.isFinite(expMs) && expMs <= Date.now()) {
-                try {
-                  localStorage.removeItem("tds_admin_authed");
-                  localStorage.removeItem("tds_admin_authed_exp");
-                  localStorage.removeItem("tds_admin_confirmed");
-                } catch (e) {}
-                redirect(); return;
-              }
+              if (Number.isFinite(expMs) && expMs <= Date.now()) { clear(); redirect(); return; }
 
               var okMs = okUntil ? Number(okUntil) : NaN;
               if (Number.isFinite(okMs) && okMs > Date.now()) return;
@@ -116,14 +121,10 @@ for (const item of registry.nav) {
               document.documentElement.classList.add("auth-checking");
               fetch(authApiUrl + "/me", { credentials: "include" }).then(function (res) {
                 if (res.ok) {
-                  try { localStorage.setItem("tds_admin_confirmed", String(Date.now() + 60000)); } catch (e) {}
+                  try { localStorage.setItem(confirmedKey, String(Date.now() + 60000)); } catch (e) {}
                   document.documentElement.classList.remove("auth-checking");
                 } else {
-                  try {
-                    localStorage.removeItem("tds_admin_authed");
-                    localStorage.removeItem("tds_admin_authed_exp");
-                    localStorage.removeItem("tds_admin_confirmed");
-                  } catch (e) {}
+                  clear();
                   redirect();
                 }
               }).catch(function () {
@@ -143,7 +144,7 @@ for (const item of registry.nav) {
         <div class="md:flex min-h-screen">
           <aside class="panel-nav w-full md:w-60 shrink-0 border-r border-[color:var(--color-border)]">
             <header class="brand-header px-4 py-4">
-              <strong class="brand-wordmark text-lg">Tracht<span class="accent-italic"> Panel</span></strong>
+              <strong class="brand-wordmark text-lg">Tracht<span class="accent-italic"> {BRAND_SUFFIX}</span></strong>
             </header>
             <nav class="px-2 pb-6">
               {/* Base-service pages (not extensions). */}
