@@ -1,0 +1,134 @@
+/**
+ * Panel auth helpers (ported from tds-admin). The real gate is always the
+ * httpOnly `tds_session` cookie tds-auth-api sets (Domain=.tracht-digital.de, so
+ * one session works across the admin + customer panels). This module manages the
+ * NON-sensitive presence hint the inline gate in Layout.astro reads to decide —
+ * before paint — whether to bounce to /login, and a per-request 401 backstop.
+ *
+ * A 401 does NOT automatically mean "logged out": it's confirmed against `/me`
+ * first, so a single RBAC/resource-scoped 401 can't loop a freshly-logged-in
+ * user back to login.
+ */
+
+const AUTHED_HINT_KEY = "tds_admin_authed";
+const AUTHED_EXP_KEY = "tds_admin_authed_exp";
+const CONFIRMED_KEY = "tds_admin_confirmed";
+
+/** How long a `/me` confirmation is trusted before the gate re-checks (ms). Keep in sync with the inline gate. */
+export const CONFIRM_TTL_MS = 60_000;
+
+export const AUTH_API_URL: string =
+  (import.meta.env.PUBLIC_AUTH_API_URL as string | undefined) ??
+  "https://api.tracht-digital.de/auth";
+
+export const API_BASE: string =
+  (import.meta.env.PUBLIC_API_BASE as string | undefined) ??
+  "https://api.tracht-digital.de";
+
+/** Mark the session present (called right after a successful login / SSO check). */
+export function setAuthed(expiresAt?: number): void {
+  try {
+    localStorage.setItem(AUTHED_HINT_KEY, "1");
+    if (expiresAt) {
+      localStorage.setItem(AUTHED_EXP_KEY, String(expiresAt));
+    }
+    // Seed the confirmation so the very next navigation paints without a
+    // redundant /me round-trip.
+    localStorage.setItem(CONFIRMED_KEY, String(Date.now() + CONFIRM_TTL_MS));
+  } catch {
+    /* storage disabled — the cookie + 401 backstop still gate */
+  }
+}
+
+export function clearAuthed(): void {
+  try {
+    localStorage.removeItem(AUTHED_HINT_KEY);
+    localStorage.removeItem(AUTHED_EXP_KEY);
+    localStorage.removeItem(CONFIRMED_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function hasAuthedHint(): boolean {
+  try {
+    return localStorage.getItem(AUTHED_HINT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** The authenticated principal, as returned by tds-auth-api GET /me. */
+export interface Me {
+  id: number;
+  email: string;
+  name?: string;
+  isAdmin?: boolean;
+  permissions?: string[];
+}
+
+export async function fetchMe(): Promise<Me | null> {
+  try {
+    const res = await fetch(`${AUTH_API_URL}/me`, { credentials: "include" });
+    return res.ok ? ((await res.json()) as Me) : null;
+  } catch {
+    return null;
+  }
+}
+
+let redirecting = false;
+
+/** Redirect to /login once, preserving the current path as ?next=. */
+function redirectToLogin(): void {
+  if (redirecting) return;
+  redirecting = true;
+  clearAuthed();
+  try {
+    document.documentElement.classList.add("auth-checking");
+  } catch {
+    /* ignore */
+  }
+  const next = encodeURIComponent(location.pathname + location.search);
+  location.replace(`/login?next=${next}`);
+}
+
+/**
+ * A 401 is verified against /me before it's treated as a dead session, so a
+ * single scoped-permission 401 never loops the user to login. Only a /me that
+ * ALSO 401s is definitive.
+ */
+async function onUnauthorized(requestUrl: string): Promise<void> {
+  // A 401 straight from /me is definitive — don't re-probe it.
+  if (requestUrl.startsWith(`${AUTH_API_URL}/me`)) {
+    redirectToLogin();
+    return;
+  }
+  const res = await fetch(`${AUTH_API_URL}/me`, { credentials: "include" });
+  if (!res.ok) {
+    redirectToLogin();
+  }
+}
+
+/**
+ * fetch wrapper for the panel API. Sends the session cookie, and on a 401
+ * confirms against /me before deciding the session is dead. Returns the original
+ * response so callers can handle a legitimate 401 (e.g. RBAC) themselves.
+ */
+export async function panelFetch(input: string | URL, init: RequestInit = {}): Promise<Response> {
+  const url = typeof input === "string" ? input : input.toString();
+  const res = await fetch(url, { credentials: "include", ...init });
+  if (res.status === 401) {
+    await onUnauthorized(url);
+  }
+  return res;
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await fetch(`${AUTH_API_URL}/logout`, { method: "POST", credentials: "include" });
+  } catch {
+    /* best effort */
+  }
+  clearAuthed();
+  location.replace("/login");
+}

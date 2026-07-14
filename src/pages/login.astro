@@ -1,0 +1,16 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LoginForm from "../components/LoginForm.tsx";
+---
+
+<Layout title="Anmelden" bare>
+  <main class="login-page min-h-screen grid place-items-center p-6">
+    <section class="card w-full max-w-sm p-6">
+      <header class="brand-header mb-4">
+        <strong class="brand-wordmark text-lg">Tracht<span class="accent-italic"> Panel</span></strong>
+      </header>
+      <h1 class="text-xl font-bold mb-4">Anmelden</h1>
+      <LoginForm client:load />
+    </section>
+  </main>
+</Layout>

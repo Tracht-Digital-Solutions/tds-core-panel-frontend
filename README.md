@@ -41,9 +41,11 @@ npm run type-check # astro check — 0 errors gate
 
 ## Status
 
-Skeleton that **validates the architecture end-to-end**: a package-provided
-route (`/time`), nav entry, and a hydrated dashboard widget all compose into the
-static build. Still to port from `tds-admin`: the real auth gate + brand chrome,
-Wiki, user management, the settings framework, and per-user dashboard layout.
-The `tds-shared` design system is intentionally not wired yet (needs the
-Packages token) — the shell is unstyled for now.
+Real shell (CP1): `tds-shared` design system wired (base + app CSS, fonts,
+`tdsViteBuild`), the ported pre-paint **auth gate** (presence hint + `/me`
+confirmation + `html.auth-checking` spinner) in `Layout.astro`, brand chrome with
+the composed nav from `virtual:panel-registry`, a `/login` page + `LoginForm`, the
+`~/lib/auth` fetch wrapper (401→`/me` backstop, cross-panel SSO hints), and the
+`CookieNotice`. Builds green (`/`, `/login`, `/time`), type-check 0 errors, fonts
+emitted. Still to port from `tds-admin`: Wiki, user management, the settings
+framework page, per-user dashboard layout, and the customer product target.

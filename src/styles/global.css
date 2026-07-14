@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* Brand design system + shared application chrome (tokens, dark theme, resets,
+   chips/buttons/fields, header shell). Lives in tds-shared so every TDS frontend
+   stays consistent. The @fontsource imports live in Layout.astro, NOT here —
+   @tailwindcss/postcss inlines CSS @imports without rebasing the packages'
+   relative url(./files/*.woff2) refs, so Vite never emits the woff2. */
+@import "@tracht-digital-solutions/tds-shared/styles/base.css";
+@import "@tracht-digital-solutions/tds-shared/styles/app.css";
+
+:root {
+  --font-display: "Lato", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+
+/* Minimal shell layout (the base host keeps its own thin chrome; extensions
+   contribute pages, not chrome). */
+.panel-nav__group-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  margin: 0.75rem 0.75rem 0.25rem;
+}

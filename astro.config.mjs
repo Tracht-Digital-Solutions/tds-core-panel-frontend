@@ -1,6 +1,9 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import { panelHost } from "@tracht-digital-solutions/tds-panel-contract/astro";
+// Shared CSS minify settings (the cssTarget that keeps lightningcss from
+// dropping the .brand-header backdrop-filter prefix). See tds-shared#10.
+import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
 
 // Enabled extensions for THIS product target (admin). The customer target is a
 // second config with a different extension list. panelHost composes them at
@@ -13,4 +16,5 @@ export default defineConfig({
   integrations: [react(), panelHost({ extensions: [timeTracker] })],
   trailingSlash: "ignore",
   build: { format: "directory" },
+  vite: { build: { ...tdsViteBuild } },
 });

@@ -1,30 +1,175 @@
 ---
-// Base panel shell. The full port carries tds-admin's auth gate + brand chrome;
-// this is the skeleton that renders the composed nav so the smoke can verify
-// extension nav + routing. `registry.nav` is already permission-annotated and
-// order-sorted by the contract.
+// Fonts must be JS imports here (not @import in global.css): @tailwindcss/postcss
+// inlines CSS @imports without rebasing the packages' url(./files/*.woff2) refs,
+// so Vite never emits the woff2. See tds-admin/AGENTS.md.
+import "@fontsource/lato/400.css";
+import "@fontsource/lato/700.css";
+import "@fontsource/lato/900.css";
+import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/global.css";
+import { CookieNotice } from "@tracht-digital-solutions/tds-shared/components";
 import { registry } from "virtual:panel-registry";
 
 interface Props {
   title: string;
+  description?: string;
+  lang?: "de" | "en";
+  /** Skip the gated chrome — used by /login itself. */
+  bare?: boolean;
 }
-const { title } = Astro.props;
+
+const {
+  title,
+  description = "Internes Panel — Tracht Digital Solutions.",
+  lang = "de",
+  bare = false,
+} = Astro.props;
+
+const authApiUrl =
+  (import.meta.env.PUBLIC_AUTH_API_URL as string | undefined) ??
+  "https://api.tracht-digital.de/auth";
+
+// Group the composed nav for rendering: extensions contribute { group, order }.
+const groups = new Map<string, typeof registry.nav>();
+for (const item of registry.nav) {
+  const key = item.group ?? "Allgemein";
+  const bucket = groups.get(key) ?? [];
+  bucket.push(item);
+  groups.set(key, bucket);
+}
 ---
 
-<html lang="de">
+<!DOCTYPE html>
+<html lang={lang}>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} · Panel</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex,nofollow" />
+
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem("tds-theme");
+          if (saved === "light" || saved === "dark") {
+            document.documentElement.setAttribute("data-theme", saved);
+            return;
+          }
+        } catch (e) {}
+        var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://api.tracht-digital.de" crossorigin />
+    <title>{title}</title>
+
+    {
+      !bare && (
+        <>
+          <style is:inline>
+            html.auth-checking body { visibility: hidden; }
+            html.auth-checking::before {
+              content: ""; position: fixed; inset: 0; z-index: 2147483646;
+              background: var(--color-paper, #fafaf7);
+            }
+            html[data-theme="dark"].auth-checking::before { background: var(--color-paper, #070a14); }
+            html.auth-checking::after {
+              content: ""; position: fixed; inset: 0; margin: auto; z-index: 2147483647;
+              width: 2.25rem; height: 2.25rem; border-radius: 9999px;
+              border: 3px solid color-mix(in srgb, var(--color-primary, #050f68) 20%, transparent);
+              border-top-color: var(--color-primary, #050f68);
+              animation: tds-auth-spin 0.7s cubic-bezier(0.5, 0.15, 0.5, 0.85) infinite;
+            }
+            @keyframes tds-auth-spin { to { transform: rotate(360deg); } }
+          </style>
+
+          <script is:inline define:vars={{ authApiUrl }}>
+            (function () {
+              function redirect() {
+                var next = encodeURIComponent(location.pathname + location.search);
+                location.replace("/login?next=" + next);
+              }
+              var hint, exp, okUntil;
+              try {
+                hint = localStorage.getItem("tds_admin_authed");
+                exp = localStorage.getItem("tds_admin_authed_exp");
+                okUntil = localStorage.getItem("tds_admin_confirmed");
+              } catch (e) { redirect(); return; }
+
+              if (!hint) { redirect(); return; }
+
+              var expMs = exp ? Number(exp) : NaN;
+              if (Number.isFinite(expMs) && expMs <= Date.now()) {
+                try {
+                  localStorage.removeItem("tds_admin_authed");
+                  localStorage.removeItem("tds_admin_authed_exp");
+                  localStorage.removeItem("tds_admin_confirmed");
+                } catch (e) {}
+                redirect(); return;
+              }
+
+              var okMs = okUntil ? Number(okUntil) : NaN;
+              if (Number.isFinite(okMs) && okMs > Date.now()) return;
+
+              document.documentElement.classList.add("auth-checking");
+              fetch(authApiUrl + "/me", { credentials: "include" }).then(function (res) {
+                if (res.ok) {
+                  try { localStorage.setItem("tds_admin_confirmed", String(Date.now() + 60000)); } catch (e) {}
+                  document.documentElement.classList.remove("auth-checking");
+                } else {
+                  try {
+                    localStorage.removeItem("tds_admin_authed");
+                    localStorage.removeItem("tds_admin_authed_exp");
+                    localStorage.removeItem("tds_admin_confirmed");
+                  } catch (e) {}
+                  redirect();
+                }
+              }).catch(function () {
+                document.documentElement.classList.remove("auth-checking");
+              });
+            })();
+          </script>
+        </>
+      )
+    }
   </head>
   <body>
-    <header class="brand-header"><strong>Base-Panel</strong></header>
-    <nav class="panel-nav">
-      <a href="/">Dashboard</a>
-      {registry.nav.map((item) => <a href={item.href} data-nav={item.id}>{item.label}</a>)}
-    </nav>
-    <main>
-      <slot />
-    </main>
+    {
+      bare ? (
+        <slot />
+      ) : (
+        <div class="md:flex min-h-screen">
+          <aside class="panel-nav w-full md:w-60 shrink-0 border-r border-[color:var(--color-border)]">
+            <header class="brand-header px-4 py-4">
+              <strong class="brand-wordmark text-lg">Tracht<span class="accent-italic"> Panel</span></strong>
+            </header>
+            <nav class="px-2 pb-6">
+              <a class="nav-item" href="/">Dashboard</a>
+              {
+                [...groups.entries()].map(([label, items]) => (
+                  <div>
+                    <p class="panel-nav__group-label">{label}</p>
+                    {items
+                      .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+                      .map((item) => (
+                        <a class="nav-item" href={item.href} data-nav={item.id}>
+                          {item.label}
+                        </a>
+                      ))}
+                  </div>
+                ))
+              }
+            </nav>
+          </aside>
+          <main id="main" class="min-w-0 flex-1 p-6">
+            <slot />
+          </main>
+        </div>
+      )
+    }
+
+    <CookieNotice client:idle variant="panel" />
   </body>
 </html>
