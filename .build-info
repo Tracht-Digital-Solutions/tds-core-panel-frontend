@@ -1,0 +1,5 @@
+target=customer
+channel=release
+commit=d9239639c8e6c94eb0b955c2816068f286428438
+built_at=2026-07-18T23:23:00Z
+workflow_run=29665104306
