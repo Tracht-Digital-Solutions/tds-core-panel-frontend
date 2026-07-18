@@ -36,9 +36,25 @@ differences to the `astro.config` / build env, not forks of the shell.
   `tdsViteBuild` once the design system is wired.
 - `npm install --no-package-lock` (Windows lockfile is win32-only).
 
+## Per-user dashboard layout
+
+The Dashboard (`src/pages/index.astro`) renders EVERY enabled widget into
+`.widget-slot[data-widget]` sections at **build time** (server-side; islands
+hydrate as usual). `src/lib/dashboardLayout.ts` then, on load, fetches the user's
+saved layout from core-panel-api (`GET /me/dashboard-layout`) and **reorders +
+shows/hides the existing DOM slots** to match — no SSR, no runtime widget
+fetching. An "Anpassen" edit mode adds drag-to-reorder (HTML5 DnD from the handle)
++ per-widget visibility checkboxes and persists via `PUT /me/dashboard-layout`.
+Progressive enhancement: no saved layout or an unreachable API ⇒ every widget
+stays visible in authored order. The edit-mode CSS is an inline `<style>` in the
+page (raw, per [[project_astro_inline_script_raw]]); the script is a real module
+import (`<script>import { initDashboardLayout }…`), not inline, so no brace trap.
+
 ## Status / next
 
-Skeleton validates end-to-end composition (package route + nav + hydrated
-widget). Next: port the auth gate + chrome, wire `tds-shared`, build the Wiki /
-users / settings-framework pages, add per-user dashboard layout, and stand up the
-customer target.
+Composition proven end-to-end (routes + nav + hydrated widgets + settings), auth
+gate + chrome + tds-shared wired, Wiki / users / settings pages built, per-user
+dashboard layout done, both product targets (admin/customer) build + deploy. Next:
+fine-grained permission + company-membership editing (needs tds-auth-api
+endpoints); move the dashboard-layout DDL into a base migration once core-panel-api
+gains a migrator.

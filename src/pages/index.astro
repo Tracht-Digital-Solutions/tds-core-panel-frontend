@@ -1,24 +1,64 @@
 ---
 // Dashboard — the widget HOST. Renders every widget contributed by the enabled
-// extensions (via virtual:panel-widgets). The full port adds per-user layout +
-// permission gating; the smoke renders them all to prove server render +
-// island hydration flow through the contract's widget slot.
+// extensions (via virtual:panel-widgets), server-side. A per-user layout
+// (dashboardLayout.ts, talking to core-panel-api's /me/dashboard-layout) then
+// reorders + shows/hides the server-rendered slots client-side and offers an
+// "Anpassen" edit mode (drag reorder + visibility toggles). Widgets are all
+// present in the DOM; the layout only arranges them — no SSR/runtime needed.
 import Layout from "../layouts/Layout.astro";
 import { widgets } from "virtual:panel-widgets";
 ---
 
 <Layout title="Dashboard">
-  <h1>Dashboard</h1>
-  <div class="dashboard-grid">
+  <div class="dashboard-head">
+    <h1>Dashboard</h1>
+    <div class="dashboard-toolbar" data-dashboard-toolbar>
+      <button type="button" data-dashboard-edit hidden>Anpassen</button>
+      <button type="button" data-dashboard-save hidden>Speichern</button>
+      <button type="button" data-dashboard-cancel hidden>Abbrechen</button>
+    </div>
+  </div>
+
+  <div class="dashboard-grid" data-dashboard-grid>
     {
       widgets.map((widget) => {
         const Widget = widget.Component as any;
+        const title = (widget as any).title ?? widget.id;
         return (
-          <section class="widget-slot" data-widget={widget.id} data-size={widget.size}>
+          <section class="widget-slot" data-widget={widget.id} data-size={widget.size} data-label={title}>
+            <div class="widget-slot__controls" aria-hidden="true">
+              <span class="widget-slot__handle" title="Ziehen zum Sortieren">⠿</span>
+              <label class="widget-slot__toggle">
+                <input type="checkbox" data-widget-visible checked />
+                <span>{title}</span>
+              </label>
+            </div>
             <Widget />
           </section>
         );
       })
     }
   </div>
+
+  <style is:inline>
+    .dashboard-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .dashboard-toolbar { display: flex; gap: 0.5rem; }
+    .widget-slot__controls { display: none; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .dashboard-grid.is-editing .widget-slot__controls { display: flex; }
+    .dashboard-grid.is-editing .widget-slot {
+      outline: 1px dashed color-mix(in srgb, var(--color-primary, #050f68) 40%, transparent);
+      outline-offset: 4px; border-radius: 0.5rem;
+    }
+    .dashboard-grid.is-editing .widget-slot.is-hidden { opacity: 0.45; }
+    .dashboard-grid.is-editing .widget-slot.is-dragging { opacity: 0.5; }
+    .widget-slot.is-hidden { display: none; }
+    .dashboard-grid.is-editing .widget-slot.is-hidden { display: block; }
+    .widget-slot__handle { cursor: grab; user-select: none; font-size: 1.1rem; line-height: 1; }
+    .widget-slot__toggle { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; }
+  </style>
+
+  <script>
+    import { initDashboardLayout } from "../lib/dashboardLayout";
+    initDashboardLayout();
+  </script>
 </Layout>

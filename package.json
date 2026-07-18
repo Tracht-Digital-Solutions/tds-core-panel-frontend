@@ -1,6 +1,6 @@
 {
   "name": "tds-core-panel-frontend",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Base panel host (Astro static). Composes enabled extensions at build time via panel-contract into one static panel. Built as the admin OR customer product target.",
   "license": "UNLICENSED",
   "private": true,
