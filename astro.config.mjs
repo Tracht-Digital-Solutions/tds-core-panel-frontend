@@ -14,6 +14,7 @@ import supportTickets from "@tracht-digital-solutions/tds-ext-support-tickets";
 import contactTickets from "@tracht-digital-solutions/tds-ext-contact-tickets";
 import websiteCms from "@tracht-digital-solutions/tds-ext-website-cms";
 import blogCms from "@tracht-digital-solutions/tds-ext-blog-cms";
+import lexware from "@tracht-digital-solutions/tds-ext-lexware";
 
 // Product target selects the enabled extension set. `PANEL_TARGET=customer`
 // builds the customer portal (customer-facing extensions only); default is the
@@ -25,7 +26,7 @@ process.env.PUBLIC_PANEL_TARGET = target;
 const extensions =
   target === "customer"
     ? [supportTickets] // customer portal: raise + follow tickets
-    : [timeTracker, supportTickets, contactTickets, websiteCms, blogCms]; // admin panel: all internal tools
+    : [timeTracker, supportTickets, contactTickets, websiteCms, blogCms, lexware]; // admin panel: all internal tools
 
 export default defineConfig({
   output: "static",
