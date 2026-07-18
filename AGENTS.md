@@ -50,11 +50,27 @@ stays visible in authored order. The edit-mode CSS is an inline `<style>` in the
 page (raw, per [[project_astro_inline_script_raw]]); the script is a real module
 import (`<script>import { initDashboardLayout }…`), not inline, so no brace trap.
 
+## User management (Nutzerverwaltung)
+
+`UsersAdmin.tsx` is the full editor: list/create/reset-password/delete plus a
+per-user form for the admin / support-agent / blog-author flags, account status,
+and **company memberships with per-company portal permissions** (the fine-grained
+RBAC). Users come from tds-auth-api (`/admin/users`; `PATCH` already accepts
+`memberships`, `isSupportAgent`, `isBlogAuthor`, `status`), companies from
+tds-customer-api (`GET /customer/admin/customers` via the gateway prefix,
+`CUSTOMER_API_URL`). Portal permission keys/labels/presets come from
+`tds-shared/permissions` (`PORTAL_PERMISSIONS`) — never inline them. Admins bypass
+portal permissions, so their memberships are cleared on save. The company list is
+best-effort: unreachable ⇒ ids shown instead of names, editing still works. (No
+auth-API change was needed — the endpoints already existed. Avatar/bio/author-
+snapshot from the old tds-admin editor are intentionally omitted — they pull in
+content-api; add them only if the blog byline needs them here.)
+
 ## Status / next
 
 Composition proven end-to-end (routes + nav + hydrated widgets + settings), auth
-gate + chrome + tds-shared wired, Wiki / users / settings pages built, per-user
-dashboard layout done, both product targets (admin/customer) build + deploy. Next:
-fine-grained permission + company-membership editing (needs tds-auth-api
-endpoints); move the dashboard-layout DDL into a base migration once core-panel-api
-gains a migrator.
+gate + chrome + tds-shared wired, Wiki / users (incl. fine-grained permission +
+membership editing) / settings pages built, per-user dashboard layout done, both
+product targets (admin/customer) build + deploy. Next: move the dashboard-layout
+DDL into a base migration once core-panel-api gains a migrator; optionally port the
+author-profile (avatar/bio) editor if the blog byline is managed from here.

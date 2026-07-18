@@ -27,6 +27,9 @@ export const API_BASE: string =
   (import.meta.env.PUBLIC_API_BASE as string | undefined) ??
   "https://api.tracht-digital.de";
 
+/** tds-customer-api, reached through the gateway's `/customer` prefix (company list). */
+export const CUSTOMER_API_URL: string = `${API_BASE}/customer`;
+
 /** Mark the session present (called right after a successful login / SSO check). */
 export function setAuthed(expiresAt?: number): void {
   try {
