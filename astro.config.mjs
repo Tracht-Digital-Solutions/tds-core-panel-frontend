@@ -11,6 +11,7 @@ import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
 // virtual modules. A conflict or missing dependency fails the build here.
 import timeTracker from "@tracht-digital-solutions/tds-ext-time-tracker";
 import supportTickets from "@tracht-digital-solutions/tds-ext-support-tickets";
+import contactTickets from "@tracht-digital-solutions/tds-ext-contact-tickets";
 import websiteCms from "@tracht-digital-solutions/tds-ext-website-cms";
 import blogCms from "@tracht-digital-solutions/tds-ext-blog-cms";
 
@@ -24,7 +25,7 @@ process.env.PUBLIC_PANEL_TARGET = target;
 const extensions =
   target === "customer"
     ? [supportTickets] // customer portal: raise + follow tickets
-    : [timeTracker, supportTickets, websiteCms, blogCms]; // admin panel: all internal tools
+    : [timeTracker, supportTickets, contactTickets, websiteCms, blogCms]; // admin panel: all internal tools
 
 export default defineConfig({
   output: "static",

@@ -25,7 +25,9 @@ loading, never `output: "server"`. The shell reads `virtual:panel-registry`
 ## Two product targets
 
 Admin and customer are the same host with different extension lists. Keep target
-differences to the `astro.config` / build env, not forks of the shell.
+differences to the `astro.config` / build env, not forks of the shell. The **admin**
+target composes all five internal extensions (time-tracker, support-tickets,
+contact-tickets, website-cms, blog-cms); **customer** composes only support-tickets.
 
 ## Gotchas (carried from the platform)
 
