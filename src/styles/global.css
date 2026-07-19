@@ -8,6 +8,13 @@
 @import "@tracht-digital-solutions/tds-shared/styles/base.css";
 @import "@tracht-digital-solutions/tds-shared/styles/app.css";
 
+/* Tailwind v4 ignores node_modules by default — but this stylesheet ships INSIDE
+   the host package and the shell/extension classes live in sibling packages. From
+   `<scope>/tds-core-panel-frontend/src/styles/global.css`, `../../../` is the
+   `@tracht-digital-solutions/` scope dir, so this scans the host AND every
+   extension package for classes. (@source must come after the @imports.) */
+@source "../../../";
+
 :root {
   --font-display: "Lato", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;

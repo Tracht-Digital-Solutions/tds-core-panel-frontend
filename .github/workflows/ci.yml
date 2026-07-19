@@ -1,7 +1,7 @@
 name: CI
 
-# PR gate: build both product targets (admin + customer) from the published
-# extension packages, no publish. Pipeline body in _build.yml.
+# PR gate: install + type-check + build the host package, no publish.
+# Pipeline body in _build.yml.
 
 on:
   pull_request:

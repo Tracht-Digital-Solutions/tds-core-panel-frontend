@@ -1,8 +1,8 @@
-name: Dev build → dev-<target> branches
+name: Dev prerelease (push → GitHub Packages @dev)
 
-# On every push to main, build both targets and force-publish each dist/ to its
-# orphan dev branch (dev-admin / dev-customer). NOT deployed — the continuously-
-# built dev artifact + push-to-main build gate. Production goes via release.yml.
+# On every push to main, publish a prerelease (<version>-dev.<run>) under the
+# `dev` dist-tag so product repos can smoke-test the host. Real versions ship via
+# release.yml. Pipeline in _build.yml.
 
 on:
   push:
@@ -10,16 +10,16 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: dev-${{ github.ref }}
+  group: dev-publish
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  packages: read
+  contents: read
+  packages: write
 
 jobs:
-  build:
+  prerelease:
     uses: ./.github/workflows/_build.yml
     with:
-      publish_branch: dev
+      publish_tag: dev
     secrets: inherit

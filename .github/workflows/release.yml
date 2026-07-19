@@ -1,25 +1,30 @@
-name: Release → release-<target> branches (manual)
+name: Release (manual → GitHub Packages @latest)
 
-# Production build, ONLY on the manual Actions button. Builds both targets,
-# force-publishes each dist/ to its orphan release branch (release-admin /
-# release-customer), then pings the per-target deploy webhook so each host pulls
-# its branch and goes live. Pipeline body in _build.yml.
+# Production release of the host package, ONLY on the manual button. Bumps the
+# version in package.json, builds, publishes @latest, and pushes the commit + tag.
+# Product repos then repin to the new ^version. Pipeline in _build.yml.
 
 on:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        type: choice
+        options: [patch, minor, major]
+        default: patch
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-publish
   cancel-in-progress: false
 
 permissions:
   contents: write
-  packages: read
+  packages: write
 
 jobs:
-  build:
+  release:
     uses: ./.github/workflows/_build.yml
     with:
-      publish_branch: release
-      deploy: true
+      publish_tag: latest
+      bump: ${{ inputs.bump }}
     secrets: inherit
