@@ -52,6 +52,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tracht-Digital-Solutions/tds-core-panel-frontend.git"
+    "url": "git+https://github.com/Tracht-Digital-Solutions/tds-core-frontend-pkg.git"
   }
 }

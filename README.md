@@ -1,10 +1,10 @@
-# tds-core-panel-frontend
+# tds-core-frontend-pkg
 
 The **base panel host**, published as a package
 (`@tracht-digital-solutions/tds-core-panel-frontend`). It ships the shell (chrome,
 pre-paint auth gate, nav), the **base pages** (Dashboard/widget host, Login, user
 management, Einstellungen, API-Wiki) and the **`corePanelBase` Astro integration**
-— consumed by the **product repos** (`tds-admin-panel` / `tds-customer-panel`),
+— consumed by the **product repos** (`tds-admin-frontend` / `tds-customer-frontend`),
 each of which composes this host with its own extension set + deploy pipeline.
 
 > This repo is **not built as an app** anymore — the products are. It's a package
@@ -33,7 +33,7 @@ export default defineConfig({
 - `corePanelBase()` — `injectRoute`s the base pages (`/`, `/login`, `/users`,
   `/einstellungen`, `/wiki`), whose entrypoints are this package's subpaths; their
   relative imports (Layout, components, lib, styles) resolve inside the package.
-- `panelHost({ extensions })` (from `tds-panel-contract`) — injects each
+- `panelHost({ extensions })` (from `tds-panel-contract-pkg`) — injects each
   extension's route + the `virtual:panel-registry` / `-widgets` / `-settings`
   modules the shell reads.
 - `PANEL_TARGET` picks the shell auth-hint key (`tds_admin_*` vs `tds_customer_*`)
@@ -47,7 +47,7 @@ export default defineConfig({
 ## Develop / release
 
 ```bash
-npm install --no-package-lock   # contract + tds-shared from GitHub Packages (NPM_TOKEN)
+npm install --no-package-lock   # contract + tds-shared-pkg from GitHub Packages (NPM_TOKEN)
 npm run type-check              # tsc --noEmit
 npm run build                   # tsup → dist/astro.js (the integration)
 ```

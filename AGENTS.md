@@ -12,7 +12,7 @@ framework (the wizard/list shell; individual sections come from extensions),
 i18n plumbing, the API fetch wrapper (401→`/me` backstop, cross-panel SSO).
 
 **Login lives OFF this host.** The login + password-change UI is the central site
-`tds-auth` (`auth.tracht-digital.de`). There is no in-app `/login` route here; the
+`tds-auth-frontend` (`auth.tracht-digital.de`). There is no in-app `/login` route here; the
 pre-paint gate and `redirectToLogin`/`logout` bounce to `LOGIN_URL`
 (`PUBLIC_LOGIN_URL`, default `https://auth.tracht-digital.de`) with an **absolute**
 `?next=`. Because the session cookie is `Domain=.tracht-digital.de`, a login there
@@ -45,7 +45,7 @@ contact-tickets, website-cms, blog-cms); **customer** composes only support-tick
 - Astro can't hydrate a component named only by a string — the widget/settings
   virtual modules carry real imports; render `const W = item.Component; <W />`.
 - Keep the frontend **static**; the auth gate is inline `<head>` + `/me` probe.
-- Don't hand-author the lightningcss `cssTarget`; spread tds-shared's
+- Don't hand-author the lightningcss `cssTarget`; spread tds-shared-pkg's
   `tdsViteBuild` once the design system is wired.
 - `npm install --no-package-lock` (Windows lockfile is win32-only).
 
@@ -82,7 +82,7 @@ content-api; add them only if the blog byline needs them here.)
 ## Status / next
 
 Composition proven end-to-end (routes + nav + hydrated widgets + settings), auth
-gate + chrome + tds-shared wired, Wiki / users (incl. fine-grained permission +
+gate + chrome + tds-shared-pkg wired, Wiki / users (incl. fine-grained permission +
 membership editing) / settings pages built, per-user dashboard layout done, both
 product targets (admin/customer) build + deploy. Next: move the dashboard-layout
 DDL into a base migration once core-panel-api gains a migrator; optionally port the
