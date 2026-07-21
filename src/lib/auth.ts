@@ -10,7 +10,7 @@
  * user back to login.
  */
 
-import { HINT_PREFIX } from "../config/target";
+import { HINT_PREFIX, LOGIN_URL } from "../config/target";
 
 const AUTHED_HINT_KEY = `${HINT_PREFIX}_authed`;
 const AUTHED_EXP_KEY = `${HINT_PREFIX}_authed_exp`;
@@ -83,7 +83,11 @@ export async function fetchMe(): Promise<Me | null> {
 
 let redirecting = false;
 
-/** Redirect to /login once, preserving the current path as ?next=. */
+/**
+ * Redirect to the central login once, preserving the current location as an
+ * absolute ?next= (the login site validates it against a *.tracht-digital.de
+ * allow-list and returns the user here).
+ */
 function redirectToLogin(): void {
   if (redirecting) return;
   redirecting = true;
@@ -93,8 +97,8 @@ function redirectToLogin(): void {
   } catch {
     /* ignore */
   }
-  const next = encodeURIComponent(location.pathname + location.search);
-  location.replace(`/login?next=${next}`);
+  const next = encodeURIComponent(location.href);
+  location.replace(`${LOGIN_URL}?next=${next}`);
 }
 
 /**
@@ -135,5 +139,5 @@ export async function logout(): Promise<void> {
     /* best effort */
   }
   clearAuthed();
-  location.replace("/login");
+  location.replace(LOGIN_URL);
 }

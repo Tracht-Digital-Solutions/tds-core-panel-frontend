@@ -10,7 +10,7 @@ import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
 import { CookieNotice } from "@tracht-digital-solutions/tds-shared/components";
 import { registry } from "virtual:panel-registry";
-import { HINT_PREFIX, BRAND_SUFFIX } from "../config/target";
+import { HINT_PREFIX, BRAND_SUFFIX, LOGIN_URL } from "../config/target";
 
 const hintKey = `${HINT_PREFIX}_authed`;
 const expKey = `${HINT_PREFIX}_authed_exp`;
@@ -90,11 +90,14 @@ for (const item of registry.nav) {
             @keyframes tds-auth-spin { to { transform: rotate(360deg); } }
           </style>
 
-          <script is:inline define:vars={{ authApiUrl, hintKey, expKey, confirmedKey }}>
+          <script is:inline define:vars={{ authApiUrl, loginUrl: LOGIN_URL, hintKey, expKey, confirmedKey }}>
             (function () {
               function redirect() {
-                var next = encodeURIComponent(location.pathname + location.search);
-                location.replace("/login?next=" + next);
+                // Bounce to the central login (auth.tracht-digital.de) with an
+                // ABSOLUTE return URL — it validates ?next= against an allow-list
+                // and sends the user back here after login.
+                var next = encodeURIComponent(location.href);
+                location.replace(loginUrl + "?next=" + next);
               }
               function clear() {
                 try {
@@ -108,20 +111,36 @@ for (const item of registry.nav) {
                 hint = localStorage.getItem(hintKey);
                 exp = localStorage.getItem(expKey);
                 okUntil = localStorage.getItem(confirmedKey);
-              } catch (e) { redirect(); return; }
+              } catch (e) { hint = null; }
 
-              if (!hint) { redirect(); return; }
+              // A hint with a known-past expiry means the local session lapsed —
+              // drop it and fall through to a fresh /me probe (the shared SSO
+              // cookie may still be valid from another panel).
+              if (hint) {
+                var expMs = exp ? Number(exp) : NaN;
+                if (Number.isFinite(expMs) && expMs <= Date.now()) { clear(); hint = null; }
+              }
 
-              var expMs = exp ? Number(exp) : NaN;
-              if (Number.isFinite(expMs) && expMs <= Date.now()) { clear(); redirect(); return; }
+              // Fresh confirmation → paint immediately (only trusted with a hint).
+              if (hint) {
+                var okMs = okUntil ? Number(okUntil) : NaN;
+                if (Number.isFinite(okMs) && okMs > Date.now()) return;
+              }
 
-              var okMs = okUntil ? Number(okUntil) : NaN;
-              if (Number.isFinite(okMs) && okMs > Date.now()) return;
-
+              // Otherwise confirm against /me before revealing. This also covers
+              // arriving fresh from the central login: the SSO cookie is set but
+              // there is no local hint yet (localStorage is per-origin — the login
+              // site cannot write this panel's). On success we SEED the hint here,
+              // so we must NOT redirect on a missing hint (that would loop against
+              // the login site, which sees a valid cookie and bounces straight
+              // back). Only a 401 from /me is a real logout.
               document.documentElement.classList.add("auth-checking");
               fetch(authApiUrl + "/me", { credentials: "include" }).then(function (res) {
                 if (res.ok) {
-                  try { localStorage.setItem(confirmedKey, String(Date.now() + 60000)); } catch (e) {}
+                  try {
+                    localStorage.setItem(hintKey, "1");
+                    localStorage.setItem(confirmedKey, String(Date.now() + 60000));
+                  } catch (e) {}
                   document.documentElement.classList.remove("auth-checking");
                 } else {
                   clear();

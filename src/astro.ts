@@ -2,8 +2,10 @@ import type { AstroIntegration } from "astro";
 
 /**
  * `corePanelBase()` — the Astro integration that injects the base panel's routes
- * (Dashboard, Login, Nutzer, Einstellungen, API-Wiki) into a consuming product
- * build. A product repo (tds-admin-panel / tds-customer-panel) adds this
+ * (Dashboard, Nutzer, Einstellungen, API-Wiki) into a consuming product build.
+ * Login lives on the central site (auth.tracht-digital.de / tds-auth), so there
+ * is no in-app /login route — the pre-paint gate bounces there instead. A product
+ * repo (tds-admin-panel / tds-customer-panel) adds this
  * alongside `panelHost({ extensions })` (which injects the extension routes +
  * widget/settings virtual modules) — so one shared host codebase serves every
  * product target, each owning only its extension set + pipeline.
@@ -17,7 +19,6 @@ const PKG = "@tracht-digital-solutions/tds-core-panel-frontend";
 
 const BASE_ROUTES: ReadonlyArray<{ pattern: string; entrypoint: string }> = [
   { pattern: "/", entrypoint: `${PKG}/src/pages/index.astro` },
-  { pattern: "/login", entrypoint: `${PKG}/src/pages/login.astro` },
   { pattern: "/users", entrypoint: `${PKG}/src/pages/users.astro` },
   { pattern: "/einstellungen", entrypoint: `${PKG}/src/pages/einstellungen.astro` },
   { pattern: "/wiki", entrypoint: `${PKG}/src/pages/wiki.astro` },

@@ -11,6 +11,17 @@ hint — port from `tds-admin`'s `Layout.astro`, DON'T reinvent), nav renderer,
 framework (the wizard/list shell; individual sections come from extensions),
 i18n plumbing, the API fetch wrapper (401→`/me` backstop, cross-panel SSO).
 
+**Login lives OFF this host.** The login + password-change UI is the central site
+`tds-auth` (`auth.tracht-digital.de`). There is no in-app `/login` route here; the
+pre-paint gate and `redirectToLogin`/`logout` bounce to `LOGIN_URL`
+(`PUBLIC_LOGIN_URL`, default `https://auth.tracht-digital.de`) with an **absolute**
+`?next=`. Because the session cookie is `Domain=.tracht-digital.de`, a login there
+is valid here immediately. Critical: the gate must **probe `/me` when there is no
+local hint** and seed the hint on success — a missing hint after arriving from the
+login site is normal (localStorage is per-origin), so it must NOT redirect on a
+missing hint or it loops against the login (which sees the valid cookie and bounces
+straight back). Only a 401 from `/me` is a real logout.
+
 **Extensions (other repos):** time-tracker, blog-CMS, website-CMS, contact- and
 support-tickets, … They contribute pages/widgets/nav/settings/permissions/i18n
 through `panel-contract` — never edited here.

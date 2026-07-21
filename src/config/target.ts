@@ -18,3 +18,13 @@ export const PANEL_TARGET: PanelTarget =
 export const HINT_PREFIX = PANEL_TARGET === "customer" ? "tds_customer" : "tds_admin";
 
 export const BRAND_SUFFIX = PANEL_TARGET === "customer" ? "Portal" : "Panel";
+
+/**
+ * Central login site (auth.tracht-digital.de). Logged-out/expired visitors are
+ * bounced here with `?next=<absolute return URL>` instead of an in-app /login
+ * page; the login site validates `next` against a *.tracht-digital.de allow-list
+ * and returns them here. Override via `PUBLIC_LOGIN_URL` (e.g. the local tds-auth
+ * dev server) during development.
+ */
+export const LOGIN_URL: string =
+  (import.meta.env.PUBLIC_LOGIN_URL as string | undefined) ?? "https://auth.tracht-digital.de";
