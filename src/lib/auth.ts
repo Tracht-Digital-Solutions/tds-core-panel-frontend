@@ -123,7 +123,7 @@ async function onUnauthorized(requestUrl: string): Promise<void> {
  * confirms against /me before deciding the session is dead. Returns the original
  * response so callers can handle a legitimate 401 (e.g. RBAC) themselves.
  */
-export async function panelFetch(input: string | URL, init: RequestInit = {}): Promise<Response> {
+export async function frontendFetch(input: string | URL, init: RequestInit = {}): Promise<Response> {
   const url = typeof input === "string" ? input : input.toString();
   const res = await fetch(url, { credentials: "include", ...init });
   if (res.status === 401) {

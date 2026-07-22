@@ -6,7 +6,7 @@ import {
   type PortalPermission,
   type PortalRolePreset,
 } from "@tracht-digital-solutions/tds-shared/permissions";
-import { AUTH_API_URL, CUSTOMER_API_URL, panelFetch } from "../lib/auth";
+import { AUTH_API_URL, CUSTOMER_API_URL, frontendFetch } from "../lib/auth";
 
 interface Membership {
   customerId: number;
@@ -53,7 +53,7 @@ export default function UsersAdmin() {
   const load = async () => {
     setError(null);
     try {
-      const [uRes, cRes] = await Promise.all([panelFetch(usersUrl), panelFetch(companiesUrl)]);
+      const [uRes, cRes] = await Promise.all([frontendFetch(usersUrl), frontendFetch(companiesUrl)]);
       if (!uRes.ok) throw new Error(`Nutzer laden fehlgeschlagen (HTTP ${uRes.status}).`);
       const uData = await uRes.json();
       setUsers(uData.users ?? []);
@@ -80,7 +80,7 @@ export default function UsersAdmin() {
   const createUser = async (payload: Record<string, unknown>) => {
     setError(null);
     setNotice(null);
-    const res = await panelFetch(usersUrl, {
+    const res = await frontendFetch(usersUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -97,7 +97,7 @@ export default function UsersAdmin() {
 
   const updateUser = async (id: number, patch: Record<string, unknown>) => {
     setError(null);
-    const res = await panelFetch(`${usersUrl}/${id}`, {
+    const res = await frontendFetch(`${usersUrl}/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
@@ -111,7 +111,7 @@ export default function UsersAdmin() {
   };
 
   const resetPassword = async (u: AdminUser) => {
-    const res = await panelFetch(`${usersUrl}/${u.id}/reset-password`, { method: "POST" });
+    const res = await frontendFetch(`${usersUrl}/${u.id}/reset-password`, { method: "POST" });
     if (res.ok) {
       const d = await res.json().catch(() => ({}));
       if (d.tempPassword) setNotice(`Neues temporäres Passwort für ${u.email}: ${d.tempPassword}`);
@@ -120,7 +120,7 @@ export default function UsersAdmin() {
 
   const remove = async (u: AdminUser) => {
     if (!window.confirm(`Nutzer „${u.name ?? u.email}“ wirklich löschen?`)) return;
-    await panelFetch(`${usersUrl}/${u.id}`, { method: "DELETE" });
+    await frontendFetch(`${usersUrl}/${u.id}`, { method: "DELETE" });
     void load();
   };
 

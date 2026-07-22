@@ -1,7 +1,7 @@
 ---
 // Dashboard — the widget HOST. Renders every widget contributed by the enabled
 // extensions (via virtual:panel-widgets), server-side. A per-user layout
-// (dashboardLayout.ts, talking to core-panel-api's /me/dashboard-layout) then
+// (dashboardLayout.ts, talking to core-frontend-api's /me/dashboard-layout) then
 // reorders + shows/hides the server-rendered slots client-side and offers an
 // "Anpassen" edit mode (drag reorder + visibility toggles). Widgets are all
 // present in the DOM; the layout only arranges them — no SSR/runtime needed.

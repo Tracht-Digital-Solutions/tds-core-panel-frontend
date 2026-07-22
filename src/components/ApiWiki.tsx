@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { API_BASE, panelFetch } from "../lib/auth";
+import { API_BASE, frontendFetch } from "../lib/auth";
 
 interface WikiRoute {
   method: string;
@@ -41,7 +41,7 @@ export default function ApiWiki() {
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    panelFetch(`${API_BASE}/wiki.json`)
+    frontendFetch(`${API_BASE}/wiki.json`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status === 403 ? "Nur für Admins." : `HTTP ${r.status}`))))
       .then((d: WikiData) => setData(d))
       .catch((e) => setError(String(e.message ?? e)));

@@ -1,7 +1,7 @@
 name: Build (reusable)
 
-# Single source of truth for the host PACKAGE. tds-core-panel-frontend is now a
-# published package (the shell + base pages + corePanelBase integration) consumed
+# Single source of truth for the host PACKAGE. tds-core-frontend is now a
+# published package (the shell + base pages + coreFrontendBase integration) consumed
 # by the product repos (tds-admin-panel / tds-customer-panel), NOT a built app.
 # Called by ci.yml (PR gate, no publish), dev.yml (@dev prerelease) and
 # release.yml (@latest + tag). NPM_TOKEN = PACKAGE_TOKEN (install contract/shared
@@ -73,7 +73,7 @@ jobs:
         if: ${{ inputs.publish_tag != 'none' }}
         uses: actions/delete-package-versions@v5
         with:
-          package-name: tds-core-panel-frontend
+          package-name: tds-core-frontend
           package-type: npm
           min-versions-to-keep: 5
           delete-only-pre-release-versions: 'true'

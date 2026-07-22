@@ -3,14 +3,14 @@
  *
  * The Dashboard page renders EVERY enabled widget into `.widget-slot[data-widget]`
  * sections at build time. This module then, on load, fetches the user's saved
- * layout from core-panel-api (`GET /me/dashboard-layout`) and reorders + shows/
+ * layout from core-frontend-api (`GET /me/dashboard-layout`) and reorders + shows/
  * hides those slots to match. An "Anpassen" edit mode lets the user drag to
  * reorder and toggle visibility, persisting via `PUT /me/dashboard-layout`.
  *
  * Progressive enhancement: with no saved layout (or the API unreachable) every
  * widget stays visible in its default order — the dashboard always works.
  */
-import { API_BASE, panelFetch } from "./auth";
+import { API_BASE, frontendFetch } from "./auth";
 
 interface LayoutRow {
   widget_id: string;
@@ -62,7 +62,7 @@ export function initDashboardLayout(): void {
     }));
 
   // ---- initial load --------------------------------------------------------
-  panelFetch(LAYOUT_URL)
+  frontendFetch(LAYOUT_URL)
     .then((r) => (r.ok ? r.json() : { layout: [] }))
     .then((d: { layout?: LayoutRow[] }) => applyLayout(d.layout ?? []))
     .catch(() => {
@@ -101,7 +101,7 @@ export function initDashboardLayout(): void {
   saveBtn.addEventListener("click", () => {
     const layout = readLayout();
     saveBtn.disabled = true;
-    panelFetch(LAYOUT_URL, {
+    frontendFetch(LAYOUT_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ layout }),

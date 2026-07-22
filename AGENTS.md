@@ -1,6 +1,6 @@
-# AGENTS.md — core-panel-frontend
+# AGENTS.md — core-frontend
 
-The base panel host. Read `panel-contract`'s AGENTS.md first — this repo consumes
+The base frontend host. Read `frontend-contract`'s AGENTS.md first — this repo consumes
 that contract.
 
 ## What's base vs. extension
@@ -9,7 +9,7 @@ that contract.
 hint — port from `tds-admin`'s `Layout.astro`, DON'T reinvent), nav renderer,
 **Dashboard widget host** + per-user layout, Wiki, user management, the settings
 framework (the wizard/list shell; individual sections come from extensions),
-i18n plumbing, the API fetch wrapper (401→`/me` backstop, cross-panel SSO).
+i18n plumbing, the API fetch wrapper (401→`/me` backstop, cross-frontend SSO).
 
 **Login lives OFF this host.** The login + password-change UI is the central site
 `tds-auth-frontend` (`auth.tracht-digital.de`). There is no in-app `/login` route here; the
@@ -24,13 +24,13 @@ straight back). Only a 401 from `/me` is a real logout.
 
 **Extensions (other repos):** time-tracker, blog-CMS, website-CMS, contact- and
 support-tickets, … They contribute pages/widgets/nav/settings/permissions/i18n
-through `panel-contract` — never edited here.
+through `frontend-contract` — never edited here.
 
 ## Composition (build-time only)
 
-`panelHost({ extensions: [...] })` in `astro.config.mjs`. No runtime plugin
-loading, never `output: "server"`. The shell reads `virtual:panel-registry`
-(nav/permissions/i18n), `virtual:panel-widgets` and `virtual:panel-settings`
+`frontendHost({ extensions: [...] })` in `astro.config.mjs`. No runtime plugin
+loading, never `output: "server"`. The shell reads `virtual:frontend-registry`
+(nav/permissions/i18n), `virtual:frontend-widgets` and `virtual:frontend-settings`
 (components with real imports). Declared in `src/env.d.ts`.
 
 ## Two product targets
@@ -54,7 +54,7 @@ contact-tickets, website-cms, blog-cms); **customer** composes only support-tick
 The Dashboard (`src/pages/index.astro`) renders EVERY enabled widget into
 `.widget-slot[data-widget]` sections at **build time** (server-side; islands
 hydrate as usual). `src/lib/dashboardLayout.ts` then, on load, fetches the user's
-saved layout from core-panel-api (`GET /me/dashboard-layout`) and **reorders +
+saved layout from core-frontend-api (`GET /me/dashboard-layout`) and **reorders +
 shows/hides the existing DOM slots** to match — no SSR, no runtime widget
 fetching. An "Anpassen" edit mode adds drag-to-reorder (HTML5 DnD from the handle)
 + per-widget visibility checkboxes and persists via `PUT /me/dashboard-layout`.
@@ -85,5 +85,5 @@ Composition proven end-to-end (routes + nav + hydrated widgets + settings), auth
 gate + chrome + tds-shared-pkg wired, Wiki / users (incl. fine-grained permission +
 membership editing) / settings pages built, per-user dashboard layout done, both
 product targets (admin/customer) build + deploy. Next: move the dashboard-layout
-DDL into a base migration once core-panel-api gains a migrator; optionally port the
+DDL into a base migration once core-frontend-api gains a migrator; optionally port the
 author-profile (avatar/bio) editor if the blog byline is managed from here.
